@@ -5,12 +5,12 @@ def send_wakeup_frame(interface, dst_mac, src_mac, eth_type, payload):
     # 构造 SOME/IP 协议头部
     # 参考SOME/IP协议，基本头部为16字节
     # Service ID (2字节), Method ID (2字节), Length (4字节), Client ID (2字节), Session ID (2字节), Protocol Version (1字节), Interface Version (1字节), Message Type (1字节), Return Code (1字节)
-    service_id = 0x1234
-    method_id = 0x5678
+    service_id = 0x0017
+    method_id = 0x0001
     client_id = 0x0001
     session_id = 0x0001
-    protocol_version = 1
-    interface_version = 1
+    protocol_version = 0x01
+    interface_version = 0x01
     message_type = 0x00  # REQUEST
     return_code = 0x00
 
@@ -44,10 +44,10 @@ def send_wakeup_frame(interface, dst_mac, src_mac, eth_type, payload):
     s.close()
 
 if __name__ == "__main__":
-    interface = "eth0"  # 替换为你的网卡名
-    dst_mac = "AA:BB:CC:DD:EE:FF"  # 目标MAC地址
-    src_mac = "11:22:33:44:55:66"  # 源MAC地址
+    interface = "enp0s31f6"  # 替换为你的网卡名
+    dst_mac = "48:d3:5d:00:12:94"  # 目标MAC地址
+    src_mac = "ac:91:a1:10:88:98"  # 源MAC地址
     eth_type = 0x0800  # 以太网类型（IPv4）
-    payload = b'Hello ECU!'  # 你的数据
+    payload = 0x000408051000  # 你的数据
 
-    send_ethernet_frame(interface, dst_mac, src_mac, eth_type, payload)
+    send_wakeup_frame(interface, dst_mac, src_mac, eth_type, payload)
