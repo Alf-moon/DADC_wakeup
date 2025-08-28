@@ -30,7 +30,8 @@ def send_wakeup_frame(interface, dst_mac, src_mac, eth_type, payload):
         return_code.to_bytes(1, 'big')
     )
 
-    someip_frame = someip_header + someip_payload
+    for i in range(len(someip_payload)):
+        someip_frame = someip_header + bytes.fromhex(someip_payload[i])
 
     frame = bytes.fromhex(dst_mac.replace(':', '')) + \
             bytes.fromhex(src_mac.replace(':', '')) + \
@@ -48,6 +49,6 @@ if __name__ == "__main__":
     dst_mac = "48:d3:5d:00:12:94"  # 目标MAC地址
     src_mac = "ac:91:a1:10:88:98"  # 源MAC地址
     eth_type = 0x0800  # 以太网类型（IPv4）
-    payload = 0x000408051000  # 你的数据
+    payload = ["00", "04", "08", "05", "10", "00"]  # 你的数据
 
     send_wakeup_frame(interface, dst_mac, src_mac, eth_type, payload)
