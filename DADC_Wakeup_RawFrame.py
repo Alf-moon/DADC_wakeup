@@ -31,7 +31,8 @@ def send_wakeup_frame(interface, dst_mac, src_mac, eth_type, payload):
     )
 
     for i in range(len(someip_payload)):
-        someip_frame = someip_header + bytes.fromhex(someip_payload[i])
+        someip_frame = someip_header + bytes.fromhex(''.join(someip_payload))
+
 
     frame = bytes.fromhex(dst_mac.replace(':', '')) + \
             bytes.fromhex(src_mac.replace(':', '')) + \
