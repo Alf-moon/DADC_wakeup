@@ -15,7 +15,7 @@ def send_wakeup_frame(interface, dst_mac, src_mac, eth_type, payload):
     return_code = 0x00
 
     # SOME/IP数据长度 = 剩余字节数（不含前4字节Length本身）
-    someip_payload = payload
+    someip_payload = bytes.fromhex(''.join(payload))
     someip_length = 8 + len(someip_payload)  # 剩余字段+数据
 
     someip_header = (
@@ -30,9 +30,7 @@ def send_wakeup_frame(interface, dst_mac, src_mac, eth_type, payload):
         return_code.to_bytes(1, 'big')
     )
 
-    for i in range(len(someip_payload)):
-        someip_frame = someip_header + bytes.fromhex(''.join(someip_payload))
-
+    someip_frame = someip_header + someip_payload
 
     frame = bytes.fromhex(dst_mac.replace(':', '')) + \
             bytes.fromhex(src_mac.replace(':', '')) + \
