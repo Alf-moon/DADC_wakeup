@@ -30,7 +30,6 @@ def send_wakeup_frame(interface, dst_mac, src_mac, eth_type, payload):
         return_code.to_bytes(1, 'big')
     )
 
-    #for i in range(len(someip_payload)):
     someip_frame = someip_header + someip_payload
 
     frame = bytes.fromhex(dst_mac.replace(':', '')) + \
@@ -38,11 +37,11 @@ def send_wakeup_frame(interface, dst_mac, src_mac, eth_type, payload):
             eth_type.to_bytes(2, byteorder='big') + \
             someip_frame
 
-    # 创建原始套接字
-    s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
-    s.bind((interface, 0))
-    s.send(frame)
-    s.close()
+# 创建原始套接字
+s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
+s.bind((interface, 0))
+s.send(frame)
+s.close()
 
 if __name__ == "__main__":
     interface = "enp0s31f6"  # 替换为你的网卡名
