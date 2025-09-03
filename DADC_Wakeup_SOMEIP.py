@@ -39,6 +39,7 @@ def send_someip_wakeup_udp(target_ip, target_port):
 
     # 创建 UDP 套接字并发送
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(('100.64.10.100', 20023))  # 12345为你想要的源端口
     sock.sendto(packet, (target_ip, target_port))
     sock.close()
 
@@ -46,7 +47,7 @@ def send_someip_wakeup_udp(target_ip, target_port):
 
 if __name__ == "__main__":
     # 替换为你的 ECU IP 和端口
-    ecu_ip = "192.168.10.7"
+    ecu_ip = "100.64.10.7"
     ecu_port = 20023
 
     send_someip_wakeup_udp(ecu_ip, ecu_port)
