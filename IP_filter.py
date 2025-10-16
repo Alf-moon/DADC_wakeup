@@ -3,7 +3,7 @@ import subprocess
 
 result = subprocess.run(['ip', 'a'], capture_output=True, text=True)
 output = result.stdout
-
+###
 pattern = r'''
     ^(?P<num>\d+):\s+(?P<iface>\w+):\s+<.*?>\s+.*?
     .*?
