@@ -30,7 +30,8 @@ def set_nic_config():
             capture_output=True, 
             text=True
         )
-
+    
+    # There is bug in this elif block!!!
     elif os.name == "nt":
         nic_config_raw = subprocess.run(
             ["powershell", "-Command", "ipconfig"],
@@ -93,11 +94,15 @@ def send_someip_wakeup_udp(target_ip, target_port):
     packet = build_someip_packet(service_id, method_id, client_id, session_id, payload_bytes)
 
     # Create UDP socket
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind(('100.64.10.15', 20023)) 
-    sock.sendto(packet, (target_ip, target_port))
-    sock.close()
-
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.bind(('100.64.10.15', 20023)) 
+        sock.sendto(packet, (target_ip, target_port))
+        sock.close()
+    except OSError as e:
+        print(f"❌ Failed to bind socket: {e}")
+        return
+    
     print(f"✅ Wakeup frame has been sent to {target_ip}:{target_port}")
 
 if __name__ == "__main__":
