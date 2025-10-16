@@ -1,4 +1,59 @@
 import socket
+import os
+import subprocess
+import re
+import time
+
+def set_nic_config():
+    pattern = re.compile(r'100\.64\.10\.\d{1,3}')
+    print(os.name)
+    if os.name ==  "posix":
+        nic_config_raw = subprocess.run(['ifconfig'], capture_output=True, text=True)
+        for line in nic_config_raw.stdout.splitlines():
+            if pattern.search(line):
+                print("Correct IP has been set up!")
+                return
+            
+        print("No proper IP has been set, will set up the link!")
+        subprocess.run(
+            ['sudo', 'ip', 'link', 'add', 'dev', 'eth0.10', 'link', 'eth0', 'type', 'vlan', 'id', '10'], 
+            capture_output=True, 
+            text=True
+        )
+        subprocess.run(
+            ['sudo', 'ip', 'addr', 'add', '100.64.10.15/24', 'dev', 'eth0.10'], 
+            capture_output=True, 
+            text=True
+        )
+        subprocess.run(
+            ['sudo', 'ip', 'link', 'set', 'up', 'eth0.10'], 
+            capture_output=True, 
+            text=True
+        )
+
+    elif os.name == "nt":
+        nic_config_raw = subprocess.run(
+            ["powershell", "-Command", "ipconfig"],
+            capture_output=True, 
+            text=True
+        )
+        
+        for line in nic_config_raw.stdout.splitlines():
+            if pattern.search(line):
+                print("Correct IP has been set up!")
+                return
+            
+        print("No proper IP has been set, will set up the link!")
+        subprocess.run(
+            ["powershell", "-Command", 'Set-NetAdapter -Name "eth0" -VlanID 10'], 
+            capture_output=True, 
+            text=True
+        )
+        subprocess.run(
+            ["powershell", "-Command", 'New-NetIPAddress -InterfaceAlias "eth0" -IPAddress "100.64.10.15" -PrefixLength 24 -DefaultGateway "100.64.10.1"'], 
+            capture_output=True, 
+            text=True
+        )
 
 def build_someip_packet(service_id, method_id, client_id, session_id, payload_bytes):
     protocol_version = 0x01
@@ -6,7 +61,7 @@ def build_someip_packet(service_id, method_id, client_id, session_id, payload_by
     message_type = 0x00  # REQUEST
     return_code = 0x00
 
-    # SOME/IP Length = 8字节头部 + payload长度（不含Length字段本身）
+    # SOME/IP Length = 8 Bytes Header + payload length
     length = 8 + len(payload_bytes)
 
     header = (
@@ -23,31 +78,30 @@ def build_someip_packet(service_id, method_id, client_id, session_id, payload_by
 
     return header + payload_bytes
 
+# UDP sending function
 def send_someip_wakeup_udp(target_ip, target_port):
-    # 参数配置（根据你的 ECU 协议定义）
     service_id = 0x0017
     method_id = 0x0001
     client_id = 0x0001
     session_id = 0x0001
 
-    # 唤醒 Payload（示例数据，请根据实际协议替换）
+    # Payload definition
     payload_hex = "00 04 08 05 10 00"
     payload_bytes = bytes.fromhex(payload_hex)
 
-    # 构造 SOME/IP 报文
+    # SOME/IP packet building
     packet = build_someip_packet(service_id, method_id, client_id, session_id, payload_bytes)
 
-    # 创建 UDP 套接字并发送
+    # Create UDP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind(('100.64.10.100', 20023))  # 12345为你想要的源端口
+    sock.bind(('100.64.10.15', 20023)) 
     sock.sendto(packet, (target_ip, target_port))
     sock.close()
 
-    print(f"✅ 唤醒帧已发送至 {target_ip}:{target_port}")
+    print(f"✅ Wakeup frame has been sent to {target_ip}:{target_port}")
 
 if __name__ == "__main__":
-    # 替换为你的 ECU IP 和端口
     ecu_ip = "100.64.10.7"
     ecu_port = 20023
-
+    set_nic_config()
     send_someip_wakeup_udp(ecu_ip, ecu_port)
